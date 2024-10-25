@@ -11,6 +11,7 @@
     "develop": "node --env-file=.env node_modules/.bin/gatsby develop",
     "start": "node --env-file=.env node_modules/.bin/gatsby develop",
     "build": "node --env-file=.env node_modules/.bin/gatsby build",
+    "build-pages": "BASEPATH=/scd gatsby build --prefix-paths",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "typecheck": "tsc --noEmit"
