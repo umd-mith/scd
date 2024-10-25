@@ -1,0 +1,1 @@
+type DeepWritable<T> = { -readonly [P in keyof T]: DeepWritable<T[P]> }; // Used to override query types that are automatically marked as readonly.
