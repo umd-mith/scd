@@ -108,7 +108,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     } else {
       urlParams.append("sort", val)
     }
-    history.pushState(null, '', '/search/?' + urlParams.toString());
+    history.pushState(null, '', '?' + urlParams.toString());
   }
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
@@ -143,7 +143,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
       if (newP > 0 && newP <= totalPages) {
         setCurrentPage(newP)
         // Update search without refreshing the page.
-        history.pushState(null, '', '/search/?' + urlParams.toString());
+        history.pushState(null, '', '?' + urlParams.toString());
       }
     }
     return <div>{prev}<strong>{startIndex+1} – {endIndex}</strong> of <strong>{results.length}</strong>{next}</div>

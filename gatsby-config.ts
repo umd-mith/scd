@@ -1,8 +1,10 @@
 import type { GatsbyConfig } from "gatsby";
 
 const baseId = process.env.AIRTABLE_SCD_BASE_ID;
+const basePath = process.env.BASEPATH
 
 const config: GatsbyConfig = {
+  pathPrefix: basePath,
   siteMetadata: {
     title: `scd`,
     siteUrl: `https://www.yourdomain.tld`

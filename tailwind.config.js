@@ -11,9 +11,6 @@ module.exports = {
       },
       maxWidth: {
         'hlg': '1140px'
-      },
-      backgroundImage: {
-        'hero-pattern': "url('/images/werd.jpg')",
       }
     },
   },

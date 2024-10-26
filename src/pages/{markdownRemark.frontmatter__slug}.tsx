@@ -18,8 +18,10 @@ export default function MdPageTemplate({data}: MdPageTemplateProps) {
   const { frontmatter, html } = markdownRemark
   return (
     <Layout>
-      <h1>{frontmatter.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: html }} />
+      <div className="w-full max-w-hlg md:flex-nowrap  md:justify-start justify-between items-center px-4 m-auto">
+        <h2 className="text-4xl">{frontmatter.title}</h2>
+        <div dangerouslySetInnerHTML={{ __html: html }}/>
+      </div>
     </Layout>
   )
 }

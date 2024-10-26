@@ -12,7 +12,7 @@ const Header = () => {
         RPTF/ARSC Sound Collections Database
       </Link>
       <ul className="flex basis-auto justify-end grow items-center list-none text-slate-100">
-        <li className="p-2 hover:text-slate-300"><Link to="about">About</Link></li>
+        <li className="p-2 hover:text-slate-300"><Link to="/about">About</Link></li>
         <li className="p-2 hover:text-slate-300"><Link to="#">Recommend a Collection</Link></li>
       </ul>
     </nav>
