@@ -5,7 +5,7 @@ import logoArsc from "../images/arsc-logo.png"
 import logoMith from "../images/MITHgrayscale.png"
 
 const Footer = () => {
-  return (<footer className="absolute bottom-0 w-full min-h-20 pt-4 border-t-gray-300 bg-gray-100">
+  return (<footer className="w-full min-h-20 pt-4 border-t-gray-300 bg-gray-100">
     <div className="w-full max-w-hlg items-center px-4 m-auto flex flex-wrap">
       <a className="block align-middle max-w-20 relative p-4 w-full flex-[0_0_8%]" href="https://radiopreservation.org/"><img alt="RPTF logo" src={logoRptf} /></a>
       <a className="block align-middle max-w-20 relative p-4 w-full flex-[0_0_8%]" href="http://arsc-audio.org/"><img alt="ARSC logo" src={logoArsc} /></a>

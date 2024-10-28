@@ -4,11 +4,11 @@ import Header from "./Header"
 import Footer from "./Footer"
 
 const Layout: React.FC<PropsWithChildren> = ({children}) => {
-  return (<>
+  return (<div>
       <Header/>
-      <main>{children}</main>
+      <main style={{minHeight: "calc(100vh - 220px)"}}>{children}</main>
       <Footer/>
-  </>)
+  </div>)
 }
 
 export default Layout
