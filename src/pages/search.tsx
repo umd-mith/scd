@@ -31,10 +31,12 @@ const Results = ({results, start}: ResultProps) => (
               <td>{d._xxxcollectionDescriptionxtxt}</td>
             </tr>}
             {d.scd_publish_status !== "collection-owner-title-description-only" && <>
-            <tr>
-              <td className="text-slate-500 text-right align-text-top">Content type{ctypes.length > 1 ? 's': ''}:</td>
-              <td>{ctypes.join("; ")}</td>
-            </tr>
+            {ctypes.length > 0 &&
+              <tr>
+                <td className="text-slate-500 text-right align-text-top">Content type{ctypes.length > 1 ? 's': ''}:</td>
+                <td>{ctypes.join("; ")}</td>
+              </tr>
+            }
             {d._xcollectionFormatsxtxtxxxcollectionFormatsxtxt && <tr>
               <td className="text-slate-500 text-right align-text-top">Format:</td>
               <td>{d._xcollectionFormatsxtxtxxxcollectionFormatsxtxt}</td>
@@ -60,6 +62,7 @@ const Results = ({results, start}: ResultProps) => (
 )
 
 const SearchPage: React.FC<PageProps> = ({data}) => {
+  const [showFacets, setShowFacets] = React.useState(false)
   const results = (data as Queries.qSearchPageQuery).allAirtableScdItems.nodes
   const [currentPage, setCurrentPage] = React.useState(1)
   const [resultsPerPage, setResultsPerPage] = React.useState<PerPageValues>(20)
@@ -68,16 +71,30 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   const totalPages = Math.ceil(results.length / resultsPerPage)
   
   const [sortOrder, setSortOrder] = React.useState<SortValues>("asc");
+  const [facets, setFacets] = React.useState<{cat: string, val: string}[]>([]);
+
+  // apply facets
+  const facetedResults = facets.length > 0 ? results.filter(r => {
+    for (const f of facets) {
+      const cat = f.cat as keyof Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"][0]["data"]
+      if (Object.keys(r.data!).includes(cat)) {
+        if ((r.data![cat] as string[])?.includes(f.val)) {
+          return true
+        }
+      }
+    }
+    return false
+  }) : results;
 
   // sort then paginate
-  (results as DeepWritable<Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"]>).sort((a, b) => {
+  (facetedResults as DeepWritable<Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"]>).sort((a, b) => {
     if (sortOrder === "asc") {
       return a.data!._xxxcollectionTitlextxt!.localeCompare(b.data!._xxxcollectionTitlextxt!)
     } else {
       return b.data!._xxxcollectionTitlextxt!.localeCompare(a.data!._xxxcollectionTitlextxt!)
     }
   })
-  const paginatedResults = results.slice(startIndex, endIndex)
+  const paginatedResults = facetedResults.slice(startIndex, endIndex)
 
   // Update component with existing query parameters on load
   React.useEffect(() => {
@@ -127,6 +144,16 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     quietlyUpdateUrlSearch("sort", val.toString())
   }
 
+  const handleAddFacet = (cat: string, val: string) => {
+    if (facets.filter(f => f.cat === cat && f.val === val)[0] === undefined) {
+      setFacets([...facets, {cat, val}])
+    }
+  }
+
+  const handleRemoveFacet = (cat: string, val: string) => {
+    setFacets(facets.filter(f => !(f.cat === cat && f.val === val)))
+  }
+
   const SmallPagination = () => {
     const prev = currentPage > 1 ? <><a href="#" onClick={(e) => handleChange(e, "prev")} className="hover:underline">« Previous</a> | </> : "";
     const next = currentPage < totalPages ? <> | <a href="#" onClick={(e) => handleChange(e, "next")} className="hover:underline">Next »</a></> : "";
@@ -146,40 +173,86 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
         history.pushState(null, '', '?' + urlParams.toString());
       }
     }
-    return <div>{prev}<strong>{startIndex+1} – {endIndex}</strong> of <strong>{results.length}</strong>{next}</div>
+    return <div>{prev}<strong>{startIndex+1} – {endIndex}</strong> of <strong>{facetedResults.length}</strong>{next}</div>
   }
 
-  // Get content types  
-  const contentTypes = results.reduce((acc: { label: string; count: number, action: () => null }[], item) => {
-    // If contentTypes is not present, skip
-    if (!item.data?._xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt) return acc;
-  
-    // Iterate through each contentType in the current item
-    item.data?._xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt.forEach(type => {
-      // Find if the contentType is already in the accumulator
-      const existing = acc.find(entry => entry.label === type);
-      if (existing) {
-        // If found, increment the count
-        existing.count += 1;
-      } else {
-        // If not found, add a new entry with count 1
-        acc.push({ label: type || "", count: 1, action: () => null });
-      }
-    });
-  
-    return acc;
-  }, [])
-  .sort((a, b) => b.count - a.count);
+  // Function to extract facets
+  const extractFacet = (field: string) => {
+    const f = field as keyof Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"][0]["data"]
+    return results.reduce((acc: { label: string; count: number, action: () => null }[], item) => {
+      // If facet value is not present, skip
+      if (!item.data![f]) return acc;
+      const values = Array.isArray(item.data![f]) ? item.data![f] : [item.data![f] as string]
+      // Iterate through each facet value in the current item
+      values.forEach(type => {
+        // Find if the facet value is already in the accumulator
+        const existing = acc.find(entry => entry.label === type);
+        if (existing) {
+          // If found, increment the count
+          existing.count += 1;
+        } else {
+          // If not found, add a new entry with count 1
+          acc.push({ label: type || "", count: 1, action: () => null });
+        }
+      });
+    
+      return acc;
+    }, [])
+    .sort((a, b) => b.count - a.count);
+  }
 
   return (
     <Layout>
       <div className="w-full max-w-hlg md:flex-nowrap md:justify-start justify-between items-center px-4 m-auto">
         <div>
           <div className=""></div>
-          <div className="flex">
-            <div className="flex-none w-1/4 px-2">
-              <h2 className="text-2xl mb-2 leading-tight h-14" id="search">Limit your search</h2>
-              <FacetAccordion label="Content type" items={contentTypes} />
+          <div className="lg:flex">
+            <div className="lg:flex-none lg:w-1/4 px-2 mb-6">
+              <div className="flex justify-between"><h2 className="text-2xl mb-2 leading-tight h-14" id="search">Limit your search</h2>
+                <span className="lg:hidden block">
+                  <Button color="transparent" onClick={(e) => {e.preventDefault(); setShowFacets(!showFacets)}}>
+                    <svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path stroke='rgba(0, 0, 0, 0.5)' strokeLinecap='round' stroke-miterlimit='10' strokeWidth='2' d='M4 7h22M4 15h22M4 23h22'/></svg>
+                  </Button>
+                </span>
+              </div>
+              <div className={`${showFacets ? '' : 'hidden'} lg:block`}>
+                <FacetAccordion
+                  label="Content type" fieldName="_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt"
+                  items={extractFacet("_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt")}
+                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt")}
+                  add={handleAddFacet}
+                  remove={handleRemoveFacet}/>
+                <FacetAccordion
+                  label="Format" fieldName="_xcollectionFormatsxtxtxxxcollectionFormatsxtxt"
+                  items={extractFacet("_xcollectionFormatsxtxtxxxcollectionFormatsxtxt")}
+                  activeFacets={facets.filter(f => f.cat === "_xcollectionFormatsxtxtxxxcollectionFormatsxtxt")}
+                  add={handleAddFacet}
+                  remove={handleRemoveFacet}/>
+                <FacetAccordion
+                  label="Genre" fieldName="_xxxcollectionGenresxtxtxxxcollectionGenresxtxt"
+                  items={extractFacet("_xxxcollectionGenresxtxtxxxcollectionGenresxtxt")}
+                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionGenresxtxtxxxcollectionGenresxtxt")}
+                  add={handleAddFacet}
+                  remove={handleRemoveFacet}/>
+                <FacetAccordion
+                  label="Recpository/Collector" fieldName="_xxxcollectionOwnerNamextxt"
+                  items={extractFacet("_xxxcollectionOwnerNamextxt")}
+                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionOwnerNamextxt")}
+                  add={handleAddFacet}
+                  remove={handleRemoveFacet}/>
+                <FacetAccordion
+                  label="Country (Location)" fieldName="_xxxcollectionOwnerLocationCountryxtxt"
+                  items={extractFacet("_xxxcollectionOwnerLocationCountryxtxt")}
+                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionOwnerLocationCountryxtxt")}
+                  add={handleAddFacet}
+                  remove={handleRemoveFacet}/>
+                <FacetAccordion
+                  label="State (Location)" fieldName="_xxxcollectionOwnerLocationStatextxt"
+                  items={extractFacet("_xxxcollectionOwnerLocationStatextxt")}
+                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionOwnerLocationStatextxt")}
+                  add={handleAddFacet}
+                  remove={handleRemoveFacet}/> 
+              </div>
             </div>
             <div className="flex-1">
               <div className="flex justify-between border-b border-slate-300 pb-4 h-14">
