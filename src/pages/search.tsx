@@ -61,6 +61,10 @@ const Results = ({results, start}: ResultProps) => (
   </section>
 )
 
+interface Facet {
+  cat: string, val: string
+}
+
 const SearchPage: React.FC<PageProps> = ({data}) => {
   const [showFacets, setShowFacets] = React.useState(false)
   const results = (data as Queries.qSearchPageQuery).allAirtableScdItems.nodes
@@ -71,7 +75,16 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   const totalPages = Math.ceil(results.length / resultsPerPage)
   
   const [sortOrder, setSortOrder] = React.useState<SortValues>("asc");
-  const [facets, setFacets] = React.useState<{cat: string, val: string}[]>([]);
+  const [facets, setFacets] = React.useState<Facet[]>([]);
+
+  const facetFields = new Map<string, string>([
+    ["Content type", "_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt"],
+    ["Format", "_xcollectionFormatsxtxtxxxcollectionFormatsxtxt"],
+    ["Genre", "_xxxcollectionGenresxtxtxxxcollectionGenresxtxt"],
+    ["Repository/Collector", "_xxxcollectionOwnerNamextxt"],
+    ["Country (Location)", "_xxxcollectionOwnerLocationCountryxtxt"],
+    ["State (Location)", "_xxxcollectionOwnerLocationStatextxt"]
+  ])
 
   // apply facets
   const facetedResults = facets.length > 0 ? results.filter(r => {
@@ -99,6 +112,20 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   // Update component with existing query parameters on load
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
+    // Facets
+    for (const facet of facetFields.keys()) {
+      const fieldName = facetFields.get(facet) || ""
+      const values = urlParams.get(fieldName)
+      if (values) {
+        const newFacets = [...facets]
+        values.split(",").forEach(val => {
+          if (facets.filter(f => f.cat === fieldName && f.val === val)[0] === undefined) {
+            newFacets.push({cat: fieldName, val})
+          }
+        })
+        setFacets(newFacets)
+      }
+    }
     // Sort
     const sort = urlParams.get("sort")
     if (sort && ["asc", "desc"].includes(sort)) {
@@ -116,42 +143,82 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     }
   }, [])
 
-  const quietlyUpdateUrlSearch = (param: string, val: string) => {
+  const quietlyUpdateUrlSearch = (queries: {param: string, val: string}[]) => {
     // Update search without refreshing the page.
     const urlParams = new URLSearchParams(window.location.search)
-    const paramFromUrl = urlParams.get("sort")
-    if (paramFromUrl) {
-      urlParams.set("sort", val)
-    } else {
-      urlParams.append("sort", val)
+    for (const q of queries) {
+      const paramFromUrl = urlParams.get(q.param)
+      if (paramFromUrl) {
+        urlParams.set(q.param, q.val)
+      } else {
+        urlParams.append(q.param, q.val)
+      }
     }
+    history.pushState(null, '', '?' + urlParams.toString());
+  }
+
+  const quietlyRemoveUrlSearch = (params: string[]) => {
+    const urlParams = new URLSearchParams(window.location.search)
+    params.forEach(q => {
+      urlParams.delete(q)
+    })
     history.pushState(null, '', '?' + urlParams.toString());
   }
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page)
     window.scrollTo({ top: 0, behavior: "smooth" })
-    quietlyUpdateUrlSearch("page", page.toString())
+    quietlyUpdateUrlSearch([{param: "page", val: page.toString()}])
   }
 
   const handlePerPageChange = (val: PerPageValues) => {
     setResultsPerPage(val)
-    quietlyUpdateUrlSearch("per_page", val.toString())
+    quietlyUpdateUrlSearch([{param: "per_page", val: val.toString()}])
   }
 
   const handleSortChange = (val: SortValues) => {
     setSortOrder(val)
-    quietlyUpdateUrlSearch("sort", val.toString())
+    quietlyUpdateUrlSearch([{param: "sort", val: val.toString()}])
+  }
+
+  const facetsToUrlQuery = (facets: Facet[]) => {
+    return facets.reduce((acc: {param: string, val: string}[], facet) => {
+      // Check if the category already exists in the accumulator
+      const existing = acc.find((i) => i.param === facet.cat);
+      if (existing) {
+        // If it exists, add the new value to the existing string, separated by a comma
+        existing.val += `,${facet.val}`;
+      } else {
+        // If it doesn't exist, add a new entry to the accumulator
+        acc.push({ param: facet.cat, val: facet.val });
+      }
+      return acc;
+    }, [])
   }
 
   const handleAddFacet = (cat: string, val: string) => {
     if (facets.filter(f => f.cat === cat && f.val === val)[0] === undefined) {
-      setFacets([...facets, {cat, val}])
+      const newFacets = [...facets, {cat, val}]
+      setFacets(newFacets)
+      const urlQueries = facetsToUrlQuery(newFacets)
+      quietlyUpdateUrlSearch(urlQueries)
     }
   }
 
   const handleRemoveFacet = (cat: string, val: string) => {
-    setFacets(facets.filter(f => !(f.cat === cat && f.val === val)))
+    const newFacets: Facet[] = [];
+    const removedFacets: string[] = [];
+    facets.forEach(f => {
+      if (!(f.cat === cat && f.val === val)) {
+        newFacets.push(f)
+      } else {
+        removedFacets.push(f.cat)
+      }
+    })
+    setFacets(newFacets)
+    quietlyRemoveUrlSearch(removedFacets)
+    const urlQueries = facetsToUrlQuery(newFacets)
+    quietlyUpdateUrlSearch(urlQueries)
   }
 
   const SmallPagination = () => {
@@ -215,43 +282,21 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
                   </Button>
                 </span>
               </div>
-              <div className={`${showFacets ? '' : 'hidden'} lg:block`}>
-                <FacetAccordion
-                  label="Content type" fieldName="_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt"
-                  items={extractFacet("_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt")}
-                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt")}
-                  add={handleAddFacet}
-                  remove={handleRemoveFacet}/>
-                <FacetAccordion
-                  label="Format" fieldName="_xcollectionFormatsxtxtxxxcollectionFormatsxtxt"
-                  items={extractFacet("_xcollectionFormatsxtxtxxxcollectionFormatsxtxt")}
-                  activeFacets={facets.filter(f => f.cat === "_xcollectionFormatsxtxtxxxcollectionFormatsxtxt")}
-                  add={handleAddFacet}
-                  remove={handleRemoveFacet}/>
-                <FacetAccordion
-                  label="Genre" fieldName="_xxxcollectionGenresxtxtxxxcollectionGenresxtxt"
-                  items={extractFacet("_xxxcollectionGenresxtxtxxxcollectionGenresxtxt")}
-                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionGenresxtxtxxxcollectionGenresxtxt")}
-                  add={handleAddFacet}
-                  remove={handleRemoveFacet}/>
-                <FacetAccordion
-                  label="Recpository/Collector" fieldName="_xxxcollectionOwnerNamextxt"
-                  items={extractFacet("_xxxcollectionOwnerNamextxt")}
-                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionOwnerNamextxt")}
-                  add={handleAddFacet}
-                  remove={handleRemoveFacet}/>
-                <FacetAccordion
-                  label="Country (Location)" fieldName="_xxxcollectionOwnerLocationCountryxtxt"
-                  items={extractFacet("_xxxcollectionOwnerLocationCountryxtxt")}
-                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionOwnerLocationCountryxtxt")}
-                  add={handleAddFacet}
-                  remove={handleRemoveFacet}/>
-                <FacetAccordion
-                  label="State (Location)" fieldName="_xxxcollectionOwnerLocationStatextxt"
-                  items={extractFacet("_xxxcollectionOwnerLocationStatextxt")}
-                  activeFacets={facets.filter(f => f.cat === "_xxxcollectionOwnerLocationStatextxt")}
-                  add={handleAddFacet}
-                  remove={handleRemoveFacet}/> 
+              <div className={`${showFacets ? '' : 'hidden'} lg:block`}>{
+                Array.from(facetFields.keys()).map((ff) => {
+                  const fieldName = facetFields.get(ff) || "";
+                  return (
+                    <FacetAccordion
+                      key={ff}
+                      label={ff}
+                      fieldName={fieldName}
+                      items={extractFacet(fieldName)}
+                      activeFacets={facets.filter(f => f.cat === fieldName)}
+                      add={handleAddFacet}
+                      remove={handleRemoveFacet}
+                    />
+                  );
+                })}
               </div>
             </div>
             <div className="flex-1">
