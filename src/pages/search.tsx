@@ -113,19 +113,19 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     // Facets
+    const newFacets: Facet[] = []
     for (const facet of facetFields.keys()) {
       const fieldName = facetFields.get(facet) || ""
       const values = urlParams.get(fieldName)
       if (values) {
-        const newFacets = [...facets]
         values.split(",").forEach(val => {
           if (facets.filter(f => f.cat === fieldName && f.val === val)[0] === undefined) {
             newFacets.push({cat: fieldName, val})
           }
         })
-        setFacets(newFacets)
       }
     }
+    setFacets(newFacets)
     // Sort
     const sort = urlParams.get("sort")
     if (sort && ["asc", "desc"].includes(sort)) {
