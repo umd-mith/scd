@@ -21,25 +21,24 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
       ) {
         nodes {
           data {
-            _xxxid
+            collection_id
             scd_publish_status
-            _xxxcollectionOwnerNamextxt
-            _xxxcollectionTitlextxt
-            _xxxcollectionDescriptionxtxt
-            _xxxcollectionExtentxtxt
-            _xcollectionFormatsxtxtxxxcollectionFormatsxtxt
-            _xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt
-            _xxxcollectionGenresxtxtxxxcollectionGenresxtxt
-            _xxxcollectionFindingAidUrlxtxt
-            _xxxcollectionOwnerLocationCountryxtxt
-            _xxxcollectionOwnerLocationStatextxt
-            _xxxcollectionCatalogUrlxtxt
-            _xxxcollectionInventoryDescriptionxtxtxxxcollectionInventoryDescriptionxtxt
-            _xxxcollectionLanguagesxtxtxxxcollectionLanguagesxtxt
-            _xxxcollectionNotesxtxt
-            _xxxcollectionOwnerLocationCityxtxt
-            _xxxcollectionUsageStatementxtxt
-            _xxxcollectionWebsiteUrlxtxt
+            collection_holder_name
+            collection_title
+            collection_description
+            collection_extent
+            collectionFormats
+            content_types
+            collection_finding_aid_url
+            collection_holder_country
+            collection_holder_state
+            collection_holder_city
+            collection_catalog_url
+            inventory_description
+            languages
+            collection_notes
+            collection_usage_statement
+            collection_website_url
           }
         }
       }
@@ -51,7 +50,7 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
   for (const node of nodes) {
     const collection = node.data
     createPage({
-      path: `/collections/${collection?._xxxid}/`,
+      path: `/collections/${collection?.collection_id}/`,
       component: path.resolve(`./src/templates/collection.tsx`),
       context: {
         ...collection

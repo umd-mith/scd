@@ -1,5 +1,6 @@
 import * as React from "react"
 import { graphql, Link, type HeadFC, type PageProps } from "gatsby"
+import { FieldsMap } from "../fieldsMap"
 import Layout from "../components/Layout"
 import Button from "../components/Button"
 import Pagination from "../components/Pagination"
@@ -18,17 +19,18 @@ const Results = ({results, start}: ResultProps) => (
   <section className="px-0 mx-5">
     {results.map((r, i) => {
       const d = r.data!
-      const faURL = d._xxxcollectionFindingAidUrlxtxt && d._xxxcollectionFindingAidUrlxtxt.startsWith("http") ? d._xxxcollectionFindingAidUrlxtxt : `http://${d._xxxcollectionFindingAidUrlxtxt}`
-      const ctypes = d._xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt || []
-      return <article className="border-b border-dotted border-slate-300 mb-7 pt-4" key={d._xxxid}>
+      d.collection_finding_aid_url
+      const faURL = d.collection_finding_aid_url && d.collection_finding_aid_url?.startsWith("http") ? d.collection_finding_aid_url : `http://${d.collection_finding_aid_url}`
+      const ctypes = d.content_types || []
+      return <article className="border-b border-dotted border-slate-300 mb-7 pt-4" key={d.collection_id}>
         <h3 className="text-xl leading-5 mb-5 font-medium">
-          {start + i}. <Link to={`/collections/${d._xxxid}`} className="text-rose-800 hover:underline">{d._xxxcollectionTitlextxt}</Link>
+          {start + i}. <Link to={`/collections/${d.collection_id}`} className="text-rose-800 hover:underline">{d.collection_title}</Link>
         </h3>
         <table className="mb-8 border-separate border-spacing-2">
           <tbody>
-            {d._xxxcollectionDescriptionxtxt && <tr>
+            {d.collection_description && <tr>
               <td className="text-slate-500 text-right align-text-top">Description:</td>
-              <td>{d._xxxcollectionDescriptionxtxt}</td>
+              <td>{d.collection_description}</td>
             </tr>}
             {d.scd_publish_status !== "collection-owner-title-description-only" && <>
             {ctypes.length > 0 &&
@@ -37,22 +39,22 @@ const Results = ({results, start}: ResultProps) => (
                 <td>{ctypes.join("; ")}</td>
               </tr>
             }
-            {d._xcollectionFormatsxtxtxxxcollectionFormatsxtxt && <tr>
+            {d.collectionFormats && <tr>
               <td className="text-slate-500 text-right align-text-top">Format:</td>
-              <td>{d._xcollectionFormatsxtxtxxxcollectionFormatsxtxt}</td>
+              <td>{d.collectionFormats}</td>
             </tr>}
-            {d._xxxcollectionExtentxtxt && <tr>
+            {d.collection_extent && <tr>
               <td className="text-slate-500 text-right align-text-top">Extent:</td>
-              <td>{d._xxxcollectionExtentxtxt}</td>
+              <td>{d.collection_extent}</td>
             </tr>}
-            {d._xxxcollectionFindingAidUrlxtxt && <tr>
+            {d.collection_finding_aid_url && <tr>
               <td className="text-slate-500 text-right align-text-top">Online finding aid:</td>
               <td><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
             </tr>}
             </>}
             <tr>
               <td className="text-slate-500 text-right align-text-top">Repository/Collector:</td>
-              <td>{d._xxxcollectionOwnerNamextxt}</td>
+              <td>{d.collection_holder_name}</td>
             </tr>
           </tbody>
         </table>
@@ -78,12 +80,11 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   const [facets, setFacets] = React.useState<Facet[]>([]);
 
   const facetFields = new Map<string, string>([
-    ["Content type", "_xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt"],
-    ["Format", "_xcollectionFormatsxtxtxxxcollectionFormatsxtxt"],
-    ["Genre", "_xxxcollectionGenresxtxtxxxcollectionGenresxtxt"],
-    ["Repository/Collector", "_xxxcollectionOwnerNamextxt"],
-    ["Country (Location)", "_xxxcollectionOwnerLocationCountryxtxt"],
-    ["State (Location)", "_xxxcollectionOwnerLocationStatextxt"]
+    ["Content type", "content_types"],
+    ["Format", "collectionFormats"],
+    ["Repository/Collector", "collection_holder_name"],
+    ["Country (Location)", "collection_holder_country"],
+    ["State (Location)", "collection_holder_state"]
   ])
 
   // apply facets
@@ -102,9 +103,9 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   // sort then paginate
   (facetedResults as DeepWritable<Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"]>).sort((a, b) => {
     if (sortOrder === "asc") {
-      return a.data!._xxxcollectionTitlextxt!.localeCompare(b.data!._xxxcollectionTitlextxt!)
+      return a.data!.collection_title!.localeCompare(b.data!.collection_title!)
     } else {
-      return b.data!._xxxcollectionTitlextxt!.localeCompare(a.data!._xxxcollectionTitlextxt!)
+      return b.data!.collection_title!.localeCompare(a.data!.collection_title!)
     }
   })
   const paginatedResults = facetedResults.slice(startIndex, endIndex)
@@ -328,22 +329,21 @@ export const query = graphql`
   query qSearchPage {
     allAirtableScdItems(
       filter: {data: {scd_publish_status: {nin: ["duplicate-record-do-not-display", "do-not-display"]}}}
-      sort: {data: {_xxxcollectionTitlextxt: ASC}}
+      sort: {data: {collection_title: ASC}}
     ) {
       nodes {
         data {
-          _xxxid
+          collection_id
           scd_publish_status
-          _xxxcollectionDescriptionxtxt
-          _xxxcollectionOwnerNamextxt
-          _xxxcollectionTitlextxt
-          _xxxcollectionExtentxtxt
-          _xcollectionFormatsxtxtxxxcollectionFormatsxtxt
-          _xxxcollectionContentTypesxtxtxxxcollectionContentTypesxtxt
-          _xxxcollectionGenresxtxtxxxcollectionGenresxtxt
-          _xxxcollectionFindingAidUrlxtxt
-          _xxxcollectionOwnerLocationCountryxtxt
-          _xxxcollectionOwnerLocationStatextxt
+          collection_description
+          collection_holder_name
+          collection_title
+          collection_extent
+          collectionFormats
+          content_types
+          collection_finding_aid_url
+          collection_holder_country
+          collection_holder_state
         }
       }
     }
