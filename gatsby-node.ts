@@ -26,10 +26,10 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
             collection_holder_name
             collection_title
             collection_description
-            collection_extent
+            extent
             collectionFormats
             content_types
-            collection_finding_aid_url
+            finding_aid_url
             collection_holder_country
             collection_holder_state
             collection_holder_city
@@ -38,7 +38,13 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
             languages
             collection_notes
             collection_usage_statement
-            collection_website_url
+            website_url
+            record_type
+            collection_holder_category
+            collection_content_category
+            physical_formats
+            creators
+            subjects
           }
         }
       }

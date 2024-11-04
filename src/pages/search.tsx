@@ -1,6 +1,5 @@
 import * as React from "react"
 import { graphql, Link, type HeadFC, type PageProps } from "gatsby"
-import { FieldsMap } from "../fieldsMap"
 import Layout from "../components/Layout"
 import Button from "../components/Button"
 import Pagination from "../components/Pagination"
@@ -19,8 +18,8 @@ const Results = ({results, start}: ResultProps) => (
   <section className="px-0 mx-5">
     {results.map((r, i) => {
       const d = r.data!
-      d.collection_finding_aid_url
-      const faURL = d.collection_finding_aid_url && d.collection_finding_aid_url?.startsWith("http") ? d.collection_finding_aid_url : `http://${d.collection_finding_aid_url}`
+      d.finding_aid_url
+      const faURL = d.finding_aid_url && d.finding_aid_url?.startsWith("http") ? d.finding_aid_url : `http://${d.finding_aid_url}`
       const ctypes = d.content_types || []
       return <article className="border-b border-dotted border-slate-300 mb-7 pt-4" key={d.collection_id}>
         <h3 className="text-xl leading-5 mb-5 font-medium">
@@ -43,11 +42,11 @@ const Results = ({results, start}: ResultProps) => (
               <td className="text-slate-500 text-right align-text-top">Format:</td>
               <td>{d.collectionFormats}</td>
             </tr>}
-            {d.collection_extent && <tr>
+            {d.extent && <tr>
               <td className="text-slate-500 text-right align-text-top">Extent:</td>
-              <td>{d.collection_extent}</td>
+              <td>{d.extent}</td>
             </tr>}
-            {d.collection_finding_aid_url && <tr>
+            {d.finding_aid_url && <tr>
               <td className="text-slate-500 text-right align-text-top">Online finding aid:</td>
               <td><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
             </tr>}
@@ -79,13 +78,13 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   const [sortOrder, setSortOrder] = React.useState<SortValues>("asc");
   const [facets, setFacets] = React.useState<Facet[]>([]);
 
-  const facetFields = new Map<string, string>([
-    ["Content type", "content_types"],
-    ["Format", "collectionFormats"],
-    ["Repository/Collector", "collection_holder_name"],
-    ["Country (Location)", "collection_holder_country"],
-    ["State (Location)", "collection_holder_state"]
-  ])
+  const facetsFromAirTable = (data as Queries.qSearchPageQuery).allAirtableScdFacets.nodes || []
+
+  const facetData = facetsFromAirTable.map(f => 
+    [f.data!.scd_field_label_revised, f.data!.Fields!.replace('-', '_')] as [string, string]
+  )
+
+  const facetFields = new Map<string, string>(facetData)
 
   // apply facets
   const facetedResults = facets.length > 0 ? results.filter(r => {
@@ -338,12 +337,26 @@ export const query = graphql`
           collection_description
           collection_holder_name
           collection_title
-          collection_extent
+          extent
           collectionFormats
           content_types
-          collection_finding_aid_url
+          finding_aid_url
           collection_holder_country
           collection_holder_state
+          record_type
+          collection_holder_category
+          collection_content_category
+          physical_formats
+          creators
+          subjects
+        }
+      }
+    }
+    allAirtableScdFacets {
+      nodes {
+        data {
+          scd_field_label_revised
+          Fields
         }
       }
     }

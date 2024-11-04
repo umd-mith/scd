@@ -59,8 +59,8 @@ const config: GatsbyConfig = {
           {
             baseId,
             tableName: `Metadata Dictionary NEW`,
-            tableView: `SCD Fields - Public Portal (Revised)`,
-            queryName: `ScdMetadataFields`,
+            tableView: `SCD Fields - Public Facets`,
+            queryName: `ScdFacets`,
             separateNodeType: true
           },
         ]
