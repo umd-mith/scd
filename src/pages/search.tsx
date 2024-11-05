@@ -8,19 +8,27 @@ import FacetAccordion from "../components/FacetAccordion"
 
 interface ResultProps {
   results: Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"]
+  fieldLabels: Queries.qSearchPageQuery["allAirtableScdFields"]["nodes"]
   start: number
 }
 
 type PerPageValues = 10 | 20 | 50 | 100
 type SortValues = "asc" | "desc"
 
-const Results = ({results, start}: ResultProps) => (
-  <section className="px-0 mx-5">
+const Results = ({results, fieldLabels, start}: ResultProps) => {
+  const getLabel = (label: string) => {
+    const f = fieldLabels.find(field => field.data!.Fields!.replace(/-/g, "_") === label)
+    if (f) {
+      return f.data!.scd_field_label_revised
+    }
+    return label
+  }
+
+  return (<section className="px-0 mx-5">
     {results.map((r, i) => {
       const d = r.data!
       d.finding_aid_url
       const faURL = d.finding_aid_url && d.finding_aid_url?.startsWith("http") ? d.finding_aid_url : `http://${d.finding_aid_url}`
-      const ctypes = d.content_types || []
       return <article className="border-b border-dotted border-slate-300 mb-7 pt-4" key={d.collection_id}>
         <h3 className="text-xl leading-5 mb-5 font-medium">
           {start + i}. <Link to={`/collections/${d.collection_id}`} className="text-rose-800 hover:underline">{d.collection_title}</Link>
@@ -28,39 +36,33 @@ const Results = ({results, start}: ResultProps) => (
         <table className="mb-8 border-separate border-spacing-2">
           <tbody>
             {d.collection_description && <tr>
-              <td className="text-slate-500 text-right align-text-top">Description:</td>
+              <td className="text-slate-500 text-right align-text-top">{getLabel('collection_description')}:</td>
               <td>{d.collection_description}</td>
             </tr>}
             {d.scd_publish_status !== "collection-owner-title-description-only" && <>
-            {ctypes.length > 0 &&
-              <tr>
-                <td className="text-slate-500 text-right align-text-top">Content type{ctypes.length > 1 ? 's': ''}:</td>
-                <td>{ctypes.join("; ")}</td>
-              </tr>
-            }
-            {d.collectionFormats && <tr>
-              <td className="text-slate-500 text-right align-text-top">Format:</td>
-              <td>{d.collectionFormats}</td>
+            {d.physical_formats && <tr>
+              <td className="text-slate-500 text-right align-text-top">{getLabel('physical_formats')}:</td>
+              <td>{d.physical_formats}</td>
             </tr>}
             {d.extent && <tr>
-              <td className="text-slate-500 text-right align-text-top">Extent:</td>
+              <td className="text-slate-500 text-right align-text-top">{getLabel('extent')}:</td>
               <td>{d.extent}</td>
             </tr>}
             {d.finding_aid_url && <tr>
-              <td className="text-slate-500 text-right align-text-top">Online finding aid:</td>
+              <td className="text-slate-500 text-right align-text-top">{getLabel('finding_aid_url')}:</td>
               <td><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
             </tr>}
             </>}
             <tr>
-              <td className="text-slate-500 text-right align-text-top">Repository/Collector:</td>
+              <td className="text-slate-500 text-right align-text-top">{getLabel('collection_holder_name')}:</td>
               <td>{d.collection_holder_name}</td>
             </tr>
           </tbody>
         </table>
       </article>})
     }
-  </section>
-)
+  </section>)
+}
 
 interface Facet {
   cat: string, val: string
@@ -79,9 +81,10 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   const [facets, setFacets] = React.useState<Facet[]>([]);
 
   const facetsFromAirTable = (data as Queries.qSearchPageQuery).allAirtableScdFacets.nodes || []
+  const fieldsFromAirTable = (data as Queries.qSearchPageQuery).allAirtableScdFields.nodes || []
 
   const facetData = facetsFromAirTable.map(f => 
-    [f.data!.scd_field_label_revised, f.data!.Fields!.replace('-', '_')] as [string, string]
+    [f.data!.scd_field_label_revised, f.data!.Fields!.replace(/-/g, '_')] as [string, string]
   )
 
   const facetFields = new Map<string, string>(facetData)
@@ -314,7 +317,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
                   ]} />
                 </div>
               </div>
-              <Results results={paginatedResults} start={startIndex + 1}/>
+              <Results results={paginatedResults} fieldLabels={fieldsFromAirTable} start={startIndex + 1}/>
               <Pagination count={totalPages} page={currentPage} onChange={handlePageChange}/>
             </div>
           </div>
@@ -334,25 +337,32 @@ export const query = graphql`
         data {
           collection_id
           scd_publish_status
+          collection_title
           collection_description
           collection_holder_name
-          collection_title
           extent
-          collectionFormats
-          content_types
+          physical_formats
           finding_aid_url
-          collection_holder_country
-          collection_holder_state
+
           record_type
+          collection_holder_state
           collection_holder_category
           collection_content_category
-          physical_formats
+          content_types
           creators
           subjects
         }
       }
     }
     allAirtableScdFacets {
+      nodes {
+        data {
+          scd_field_label_revised
+          Fields
+        }
+      }
+    }
+    allAirtableScdFields {
       nodes {
         data {
           scd_field_label_revised

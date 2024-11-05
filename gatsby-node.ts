@@ -23,35 +23,45 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
           data {
             collection_id
             scd_publish_status
-            collection_holder_name
+            record_type
+            collection_content_category
             collection_title
             collection_description
-            extent
-            collectionFormats
-            content_types
-            finding_aid_url
-            collection_holder_country
-            collection_holder_state
-            collection_holder_city
-            collection_catalog_url
-            inventory_description
-            languages
-            collection_notes
-            collection_usage_statement
-            website_url
-            record_type
             collection_holder_category
-            collection_content_category
-            physical_formats
-            creators
+            collection_holder_name
+            collection_holder_city
+            collection_holder_state
+            collection_holder_country
+            content_types
+            dates
+            extent
+            historical_relevance
             subjects
+            creators
+            physical_formats
+            access_statement
+            finding_aid_url
+            collection_catalog_url
+            supporting_documentation
+            languages
+            inventory_description
+          }
+        }
+      }
+      allAirtableScdFields {
+        nodes {
+          data {
+            Fields
+            scd_field_label_revised
           }
         }
       }
     }
   `)
 
-  const {nodes} = (results.data as Queries.qCollectionsQuery).allAirtableScdItems;
+  const r = results.data as Queries.qCollectionsQuery;
+  const {nodes} = r.allAirtableScdItems;
+  const fields = r.allAirtableScdFields.nodes;
 
   for (const node of nodes) {
     const collection = node.data
@@ -59,7 +69,8 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
       path: `/collections/${collection?.collection_id}/`,
       component: path.resolve(`./src/templates/collection.tsx`),
       context: {
-        ...collection
+        collection: {...collection},
+        fields
       }
     })
   }

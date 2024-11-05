@@ -3,12 +3,25 @@ import { Link, type HeadFC, type PageProps } from "gatsby"
 import Layout from "../components/Layout"
 
 const Collection: React.FC<PageProps> = ({pageContext}) => {
-  const data = pageContext as Queries.qCollectionsQuery["allAirtableScdItems"]["nodes"][0]["data"]
-  const d = data!
-  const faURL = d.collection_finding_aid_url && d.collection_finding_aid_url.startsWith("http") ? d.collection_finding_aid_url : `http://${d.collection_finding_aid_url}`
+  const context = pageContext as {
+    collection: Queries.qCollectionsQuery["allAirtableScdItems"]["nodes"][0]["data"]
+    fields: Queries.qCollectionsQuery["allAirtableScdFields"]["nodes"]
+  }
+
+  const getLabel = (label: string) => {
+    const f = context.fields.find(field => field.data!.Fields!.replace(/-/g, "_") === label)
+    if (f) {
+      return f.data!.scd_field_label_revised
+    }
+    return label
+  }
+  
+  const d = context.collection!
+  const faURL = d.finding_aid_url && d.finding_aid_url.startsWith("http") ? d.finding_aid_url : `http://${d.finding_aid_url}`
   const catURL = d.collection_catalog_url && d.collection_catalog_url.startsWith("http") ? d.collection_catalog_url : `http://${d.collection_catalog_url}`
-  const webURL = d.collection_website_url && d.collection_website_url.startsWith("http") ? d.collection_website_url : `http://${d.collection_website_url}`
   const ctypes = d.content_types || []
+  const subjects = d.subjects || []
+  const formats = d.physical_formats || []
   const langs = d.languages || []
   const loc = []
   d.collection_holder_city ? loc.push(d.collection_holder_city) : false;
@@ -27,46 +40,80 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
             <table className="mb-8 border-separate border-spacing-2">
               <tbody>
                 {d.collection_description && <tr>
-                  <td className="text-slate-500 text-right align-text-top">Description:</td>
+                  <td className="text-slate-500 text-right align-text-top">{getLabel("collection_description")}:</td>
                   <td>{d.collection_description}</td>
                 </tr>}
                 { // additional fields for public entries.
                   d.scd_publish_status !== "collection-owner-title-description-only" && <>
+                  {d.record_type && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("record_type")}:</td>
+                    <td>{d.record_type}</td>
+                  </tr>}
+                  {ctypes.length > 0 &&
                   <tr>
-                    <td className="text-slate-500 text-right align-text-top">Content type{ctypes.length > 1 ? 's': ''}:</td>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("content_types")}:</td>
                     <td>{ctypes.join("; ")}</td>
                   </tr>
-                  {d.collectionFormats && <tr>
-                    <td className="text-slate-500 text-right align-text-top">Format:</td>
-                    <td>{d.collectionFormats}</td>
+                  }
+                  {d.collection_content_category && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("collection_content_category")}:</td>
+                    <td>{d.collection_content_category}</td>
                   </tr>}
-                  {d.collection_extent && <tr>
-                    <td className="text-slate-500 text-right align-text-top">Extent:</td>
-                    <td>{d.collection_extent}</td>
+                  {d.collection_holder_category && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("collection_holder_category")}:</td>
+                    <td>{d.collection_holder_category}</td>
+                  </tr>}
+                  {d.extent && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("extent")}:</td>
+                    <td>{d.extent}</td>
+                  </tr>}
+                  {d.dates && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("dates")}:</td>
+                    <td>{d.dates}</td>
+                  </tr>}
+                  {d.historical_relevance && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("historical_relevance")}:</td>
+                    <td>{d.historical_relevance}</td>
+                  </tr>}
+                  {subjects.length > 0 &&
+                    <tr>
+                      <td className="text-slate-500 text-right align-text-top">{getLabel("subjects")}:</td>
+                      <td>{subjects.join("; ")}</td>
+                    </tr>
+                  }
+                  {d.creators && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("creators")}:</td>
+                    <td>{d.creators}</td>
+                  </tr>}
+                  {formats.length > 0 && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("physical_formats")}:</td>
+                    <td>{formats}</td>
                   </tr>}
                   {langs.length > 0 &&
                     <tr>
-                      <td className="text-slate-500 text-right align-text-top">Language{langs.length > 1 ? 's': ''}:</td>
+                      <td className="text-slate-500 text-right align-text-top">{getLabel("languages")}:</td>
                       <td>{langs.join("; ")}</td>
                     </tr>
                   }
-                  {d.collection_notes && 
-                    <tr>
-                      <td className="text-slate-500 text-right align-text-top">Additional notes:</td>
-                      <td>{d.collection_notes}</td>
-                    </tr>
-                  }
-                  {d.collection_finding_aid_url && <tr>
-                    <td className="text-slate-500 text-right align-text-top">Online finding aid:</td>
+                  {d.finding_aid_url && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("finding_aid_url")}:</td>
                     <td><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
                   </tr>}
+                  {d.supporting_documentation && 
+                    <tr>
+                      <td className="text-slate-500 text-right align-text-top">{getLabel("supporting_documentation")}:</td>
+                      <td>{d.supporting_documentation}</td>
+                    </tr>
+                  }
+                  {d.inventory_description && 
+                    <tr>
+                      <td className="text-slate-500 text-right align-text-top">{getLabel("inventory_description")}:</td>
+                      <td>{d.inventory_description}</td>
+                    </tr>
+                  }
                   {d.collection_catalog_url && <tr>
                     <td className="text-slate-500 text-right align-text-top">Online catalog:</td>
                     <td><a className="underline break-all" href={catURL}>View on {new URL(catURL).hostname}</a></td>
-                  </tr>}
-                  {d.collection_website_url && <tr>
-                    <td className="text-slate-500 text-right align-text-top">Collection website:</td>
-                    <td><a className="underline break-all" href={webURL}>View on {new URL(webURL).hostname}</a></td>
                   </tr>}
                   </>
                 }
@@ -80,12 +127,10 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
                     <td className="text-slate-500 text-right align-text-top">Location:</td>
                     <td>{loc.join(", ")}</td>
                   </tr>
-                  {d.collection_usage_statement && 
-                    <tr>
-                      <td className="text-slate-500 text-right align-text-top">Usage statement:</td>
-                      <td>{d.collection_usage_statement}</td>
-                    </tr>
-                  }
+                  {d.access_statement && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("access_statement")}:</td>
+                    <td>{d.access_statement}</td>
+                  </tr>}
                 </>}
               </tbody>
             </table>
