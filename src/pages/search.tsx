@@ -37,25 +37,25 @@ const Results = ({results, fieldLabels, start}: ResultProps) => {
           <tbody>
             {d.collection_description && <tr>
               <td className="text-slate-500 text-right align-text-top">{getLabel('collection_description')}:</td>
-              <td>{d.collection_description}</td>
+              <td className="align-text-top">{d.collection_description}</td>
             </tr>}
             {d.scd_publish_status !== "collection-owner-title-description-only" && <>
-            {d.physical_formats && <tr>
+            {(d.physical_formats || []).length > 0 && <tr>
               <td className="text-slate-500 text-right align-text-top">{getLabel('physical_formats')}:</td>
-              <td>{d.physical_formats}</td>
+              <td className="align-text-top">{d.physical_formats?.join("; ")}</td>
             </tr>}
             {d.extent && <tr>
               <td className="text-slate-500 text-right align-text-top">{getLabel('extent')}:</td>
-              <td>{d.extent}</td>
+              <td className="align-text-top">{d.extent}</td>
             </tr>}
             {d.finding_aid_url && <tr>
               <td className="text-slate-500 text-right align-text-top">{getLabel('finding_aid_url')}:</td>
-              <td><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
+              <td className="align-text-top"><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
             </tr>}
             </>}
             <tr>
               <td className="text-slate-500 text-right align-text-top">{getLabel('collection_holder_name')}:</td>
-              <td>{d.collection_holder_name}</td>
+              <td className="align-text-top">{d.collection_holder_name}</td>
             </tr>
           </tbody>
         </table>
@@ -73,10 +73,6 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   const results = (data as Queries.qSearchPageQuery).allAirtableScdItems.nodes
   const [currentPage, setCurrentPage] = React.useState(1)
   const [resultsPerPage, setResultsPerPage] = React.useState<PerPageValues>(20)
-  const startIndex = (currentPage - 1) * resultsPerPage
-  const endIndex = startIndex + resultsPerPage
-  const totalPages = Math.ceil(results.length / resultsPerPage)
-  
   const [sortOrder, setSortOrder] = React.useState<SortValues>("asc");
   const [facets, setFacets] = React.useState<Facet[]>([]);
 
@@ -110,6 +106,11 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
       return b.data!.collection_title!.localeCompare(a.data!.collection_title!)
     }
   })
+
+  const totalPages = Math.ceil(facetedResults.length / resultsPerPage)
+  const startIndex = (currentPage - 1) * resultsPerPage
+  const endIndex = Math.min(startIndex + resultsPerPage, facetedResults.length)
+
   const paginatedResults = facetedResults.slice(startIndex, endIndex)
 
   // Update component with existing query parameters on load

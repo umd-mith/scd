@@ -23,10 +23,21 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
   const subjects = d.subjects || []
   const formats = d.physical_formats || []
   const langs = d.languages || []
+  const contentCats = d.collection_content_category || []
+  const holderCats = d.collection_holder_category || []
+  const invDesc = d.inventory_description || []
+  const creators = d.creators || []
   const loc = []
   d.collection_holder_city ? loc.push(d.collection_holder_city) : false;
   d.collection_holder_state ? loc.push(d.collection_holder_state) : false; 
   d.collection_holder_country ? loc.push(d.collection_holder_country) : false;
+
+  const Field = ({label, value}: {label: string, value: string}) => {
+    return <tr>
+      <td className="text-slate-500 text-right align-text-top">{getLabel(label)}:</td>
+      <td className="align-text-top">{value}</td>
+    </tr>
+  }
 
   return (
     <Layout>
@@ -39,98 +50,42 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
             <p className="text-red-800 underline"><Link to="/search">« Back to search</Link></p>
             <table className="mb-8 border-separate border-spacing-2">
               <tbody>
-                {d.collection_description && <tr>
-                  <td className="text-slate-500 text-right align-text-top">{getLabel("collection_description")}:</td>
-                  <td>{d.collection_description}</td>
-                </tr>}
                 { // additional fields for public entries.
                   d.scd_publish_status !== "collection-owner-title-description-only" && <>
-                  {d.record_type && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("record_type")}:</td>
-                    <td>{d.record_type}</td>
-                  </tr>}
-                  {ctypes.length > 0 &&
-                  <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("content_types")}:</td>
-                    <td>{ctypes.join("; ")}</td>
-                  </tr>
-                  }
-                  {d.collection_content_category && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("collection_content_category")}:</td>
-                    <td>{d.collection_content_category}</td>
-                  </tr>}
-                  {d.collection_holder_category && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("collection_holder_category")}:</td>
-                    <td>{d.collection_holder_category}</td>
-                  </tr>}
-                  {d.extent && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("extent")}:</td>
-                    <td>{d.extent}</td>
-                  </tr>}
-                  {d.dates && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("dates")}:</td>
-                    <td>{d.dates}</td>
-                  </tr>}
-                  {d.historical_relevance && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("historical_relevance")}:</td>
-                    <td>{d.historical_relevance}</td>
-                  </tr>}
-                  {subjects.length > 0 &&
-                    <tr>
-                      <td className="text-slate-500 text-right align-text-top">{getLabel("subjects")}:</td>
-                      <td>{subjects.join("; ")}</td>
-                    </tr>
-                  }
-                  {d.creators && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("creators")}:</td>
-                    <td>{d.creators}</td>
-                  </tr>}
-                  {formats.length > 0 && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("physical_formats")}:</td>
-                    <td>{formats}</td>
-                  </tr>}
-                  {langs.length > 0 &&
-                    <tr>
-                      <td className="text-slate-500 text-right align-text-top">{getLabel("languages")}:</td>
-                      <td>{langs.join("; ")}</td>
-                    </tr>
-                  }
-                  {d.finding_aid_url && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("finding_aid_url")}:</td>
-                    <td><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
-                  </tr>}
-                  {d.supporting_documentation && 
-                    <tr>
-                      <td className="text-slate-500 text-right align-text-top">{getLabel("supporting_documentation")}:</td>
-                      <td>{d.supporting_documentation}</td>
-                    </tr>
-                  }
-                  {d.inventory_description && 
-                    <tr>
-                      <td className="text-slate-500 text-right align-text-top">{getLabel("inventory_description")}:</td>
-                      <td>{d.inventory_description}</td>
-                    </tr>
-                  }
-                  {d.collection_catalog_url && <tr>
-                    <td className="text-slate-500 text-right align-text-top">Online catalog:</td>
-                    <td><a className="underline break-all" href={catURL}>View on {new URL(catURL).hostname}</a></td>
-                  </tr>}
-                  </>
-                }
-                <tr>
-                  <td className="text-slate-500 text-right align-text-top">Repository/Collector:</td>
-                  <td>{d.collection_holder_name}</td>
-                </tr>
+                  {d.record_type && <Field label="record_type" value={d.record_type}/>}
+                  {contentCats.length > 0 && <Field label="collection_content_category" value={contentCats.join('; ')}/>}
+                </>}
+                {d.collection_description && <Field label="collection_description" value={d.collection_description}/>}
+                { // additional fields for public entries.
+                  d.scd_publish_status !== "collection-owner-title-description-only" && <>
+                  {holderCats && <Field label="collection_holder_category" value={holderCats.join("; ")}/>}
+                </>}
+                <Field label="collection_holder_name" value={d.collection_holder_name}/>
                 { // additional fields for public entries.
                   d.scd_publish_status !== "collection-owner-title-description-only" && <>
                   <tr>
                     <td className="text-slate-500 text-right align-text-top">Location:</td>
-                    <td>{loc.join(", ")}</td>
+                    <td className="align-text-top">{loc.join(", ")}</td>
                   </tr>
-                  {d.access_statement && <tr>
-                    <td className="text-slate-500 text-right align-text-top">{getLabel("access_statement")}:</td>
-                    <td>{d.access_statement}</td>
+                  {ctypes.length > 0 && <Field label="content_types" value={ctypes.join("; ")}/>}
+                  {d.dates && <Field label="dates" value={d.dates}/>}
+                  {d.extent && <Field label="extent" value={d.extent}/>}
+                  {d.historical_relevance && <Field label="historical_relevance" value={d.historical_relevance}/>}
+                  {subjects.length > 0 && <Field label="subjects" value={subjects.join("; ")}/>}
+                  {creators.length > 0 && <Field label="creators" value={creators.join("; ")}/>}
+                  {formats.length > 0 && <Field label="physical_formats" value={formats.join("; ")}/>}
+                  {d.access_statement && <Field label="access_statement" value={d.access_statement}/>}
+                  {d.finding_aid_url && <tr>
+                    <td className="text-slate-500 text-right align-text-top">{getLabel("finding_aid_url")}:</td>
+                    <td className="align-text-top"><a className="underline break-all" href={faURL}>View on {new URL(faURL).hostname}</a></td>
                   </tr>}
+                  {d.collection_catalog_url && <tr>
+                    <td className="text-slate-500 text-right align-text-top">Online catalog:</td>
+                    <td className="align-text-top"><a className="underline break-all" href={catURL}>View on {new URL(catURL).hostname}</a></td>
+                  </tr>}
+                  {d.supporting_documentation && <Field label="supporting_documentation" value={d.supporting_documentation}/>}
+                  {langs.length > 0 && <Field label="languages" value={langs.join("; ")}/>}
+                  {invDesc.length > 0 && <Field label="inventory_description" value={invDesc.join("; ")}/>}
                 </>}
               </tbody>
             </table>
