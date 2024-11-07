@@ -1,5 +1,6 @@
 import * as React from "react"
 import { graphql, Link, type HeadFC, type PageProps } from "gatsby"
+import { useFlexSearch } from 'react-use-flexsearch'
 import Layout from "../components/Layout"
 import Button from "../components/Button"
 import Pagination from "../components/Pagination"
@@ -75,9 +76,10 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   const [resultsPerPage, setResultsPerPage] = React.useState<PerPageValues>(20)
   const [sortOrder, setSortOrder] = React.useState<SortValues>("asc");
   const [facets, setFacets] = React.useState<Facet[]>([]);
-
-  const facetsFromAirTable = (data as Queries.qSearchPageQuery).allAirtableScdFacets.nodes || []
-  const fieldsFromAirTable = (data as Queries.qSearchPageQuery).allAirtableScdFields.nodes || []
+  
+  const d = data as Queries.qSearchPageQuery
+  const facetsFromAirTable = d.allAirtableScdFacets.nodes || []
+  const fieldsFromAirTable = d.allAirtableScdFields.nodes || []
 
   const facetData = facetsFromAirTable.map(f => 
     [f.data!.scd_field_label_revised, f.data!.Fields!.replace(/-/g, '_')] as [string, string]
@@ -98,8 +100,15 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     return false
   }) : results;
 
+  const [searchQuery, setSearchQuery] = React.useState<string>()
+  const searchData = useFlexSearch(searchQuery, d.localSearchCollections.index, d.localSearchCollections.store)
+  const searchResultIds = searchData.map((item: {collection_id: string}) => item.collection_id)
+
+  // Apply search results
+  const searchResults = searchQuery ? facetedResults.filter(r => searchResultIds.includes(r.data!.collection_id)) : facetedResults;
+
   // sort then paginate
-  (facetedResults as DeepWritable<Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"]>).sort((a, b) => {
+  (searchResults as DeepWritable<Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"]>).sort((a, b) => {
     if (sortOrder === "asc") {
       return a.data!.collection_title!.localeCompare(b.data!.collection_title!)
     } else {
@@ -107,15 +116,20 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     }
   })
 
-  const totalPages = Math.ceil(facetedResults.length / resultsPerPage)
+  const totalPages = Math.ceil(searchResults.length / resultsPerPage)
   const startIndex = (currentPage - 1) * resultsPerPage
-  const endIndex = Math.min(startIndex + resultsPerPage, facetedResults.length)
+  const endIndex = Math.min(startIndex + resultsPerPage, searchResults.length)
 
-  const paginatedResults = facetedResults.slice(startIndex, endIndex)
+  const paginatedResults = searchResults.slice(startIndex, endIndex)
 
   // Update component with existing query parameters on load
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
+    // Search Query
+    const q = urlParams.get("q")
+    if (q) {
+      setSearchQuery(q)
+    }
     // Facets
     const newFacets: Facet[] = []
     for (const facet of facetFields.keys()) {
@@ -244,13 +258,13 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
         history.pushState(null, '', '?' + urlParams.toString());
       }
     }
-    return <div>{prev}<strong>{startIndex+1} – {endIndex}</strong> of <strong>{facetedResults.length}</strong>{next}</div>
+    return endIndex > 0 ? <div>{prev}<strong>{startIndex+1} – {endIndex}</strong> of <strong>{searchResults.length}</strong>{next}</div> : ""
   }
 
   // Function to extract facets
   const extractFacet = (field: string) => {
     const f = field as keyof Queries.qSearchPageQuery["allAirtableScdItems"]["nodes"][0]["data"]
-    return results.reduce((acc: { label: string; count: number, action: () => null }[], item) => {
+    return results.reduce((acc: { label: string; count: number, inSearchCount: number, action: () => null }[], item) => {
       // If facet value is not present, skip
       if (!item.data![f]) return acc;
       const values = Array.isArray(item.data![f]) ? item.data![f] : [item.data![f] as string]
@@ -258,13 +272,16 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
       values.forEach(type => {
         // Find if the facet value is already in the accumulator
         const existing = acc.find(entry => entry.label === type);
+        const inSearch = !searchQuery ? true : searchResultIds.includes(item.data!.collection_id);
         if (existing) {
           // If found, increment the count
           existing.count += 1;
+          if (inSearch) existing.inSearchCount += 1;
         } else {
           // If not found, add a new entry with count 1
-          acc.push({ label: type || "", count: 1, action: () => null });
+          acc.push({ label: type || "", count: 1, inSearchCount: inSearch ? 1 : 0, action: () => null });
         }
+        
       });
     
       return acc;
@@ -272,11 +289,33 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     .sort((a, b) => b.count - a.count);
   }
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const q = e.target.value
+    setSearchQuery(q)
+    if (q === "") {
+      quietlyRemoveUrlSearch(["q"])
+    } else {
+      quietlyUpdateUrlSearch([{param: "q", val: e.target.value}])
+    }
+  }
+
   return (
     <Layout>
       <div className="w-full max-w-hlg md:flex-nowrap md:justify-start justify-between items-center px-4 m-auto">
         <div>
-          <div className=""></div>
+          <div className="py-4 pl-2">
+            <form className="w-full">   
+              <label htmlFor="default-search" className="mb-2 text-sm font-medium text-gray-900 sr-only">Search</label>
+              <div className="relative">
+                  <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                      <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                      </svg>
+                  </div>
+                  <input onChange={handleSearchChange} value={searchQuery} type="search" id="default-search" className="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-rose-800 focus:border-rose-800" placeholder="Search..." required />
+              </div>
+            </form>
+          </div>
           <div className="lg:flex">
             <div className="lg:flex-none lg:w-1/4 px-2 mb-6">
               <div className="flex justify-between"><h2 className="text-2xl mb-2 leading-tight h-14" id="search">Limit your search</h2>
@@ -304,7 +343,8 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
               </div>
             </div>
             <div className="flex-1">
-              <div className="flex justify-between border-b border-slate-300 pb-4 h-14">
+            {searchResults.length > 0 
+              ? <><div className="flex justify-between border-b border-slate-300 pb-4 h-14">
                 <SmallPagination />
                 <div>Sort by: <Dropdown items={[
                   {label: "A-Z", active: sortOrder === "asc", action: () => handleSortChange("asc")},
@@ -319,7 +359,9 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
                 </div>
               </div>
               <Results results={paginatedResults} fieldLabels={fieldsFromAirTable} start={startIndex + 1}/>
-              <Pagination count={totalPages} page={currentPage} onChange={handlePageChange}/>
+              <Pagination count={totalPages} page={currentPage} onChange={handlePageChange}/></>
+              : <div className="text-2xl px-3">No results.</div>
+              }
             </div>
           </div>
         </div>
@@ -370,6 +412,10 @@ export const query = graphql`
           Fields
         }
       }
+    }
+    localSearchCollections {
+      store
+      index
     }
   }
 `

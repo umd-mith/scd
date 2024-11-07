@@ -17,9 +17,6 @@ const Header = () => {
       </ul>
     </nav>
   </header>
-  <div className="h-14">
-    {/* This will hold the search bar */}
-  </div>
   </>)
 }
 

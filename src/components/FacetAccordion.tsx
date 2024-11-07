@@ -79,7 +79,10 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({lab
               return <li className={`table-row ${active ? 'text-green-600 font-bold' : ''}`} key={`v${item.label}`}>
                 <span className="table-cell px-4 -indent-4 pb-2 break-words hyphens-auto">
                   {active
-                    ? <>{item.label}<a onClick={(e) => handleRemoveFacet(e, item)} href="#" className="text-gray-500 font-bold pl-2 text-[0.6rem] align-bottom hover:text-rose-800"><span aria-hidden="true">✖</span><span className="sr-only">[remove]</span></a></>
+                    ? <>
+                        <a onClick={(e) => handleRemoveFacet(e, item)} href="#" className="text-gray-500 font-bold pr-2 text-[0.6rem] align-bottom hover:text-rose-800"><span aria-hidden="true">✖</span><span className="sr-only">[remove]</span></a>
+                        {item.label}
+                      </>
                     : <a className="text-rose-800 hover:underline" href="#" onClick={(e) => handleItemClick(e, item)}>{item.label}</a>
                   }
                 </span>
