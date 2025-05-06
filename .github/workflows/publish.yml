@@ -20,7 +20,7 @@ jobs:
           AIRTABLE_SCD_BASE_ID: ${{ secrets.AIRTABLE_SCD_BASE_ID }}
         run: |
           npm install
-          npm run build
+          npm run build-pages
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
