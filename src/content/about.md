@@ -3,20 +3,27 @@ slug: "/about"
 title: "About"
 ---
 
-The RPTF/ARSC Sound Collections Database is supported by the Radio Preservation Task Force, National Recording Preservation Board of the Library of Congress (RPTF) and ARSC (Association for Recorded Sound Collections). It includes information gathered by the RPTF, and the information will be edited and enhanced over time. We will also be making changes to this site’s appearance and functionality based on user feedback. The Task Force is also seeking out additional collections to list in the database.
+The Sound Collections Database (SCD) is a national directory of archival sound collections, originally developed by the [Radio Preservation Task Force (RPTF)](https://radiopreservation.org/) of the [Library of Congress’s National Recording Preservation Board (NRPB)](https://www.loc.gov/programs/national-recording-preservation-board/about-this-program), in partnership with the [Association for Recorded Sound Collections (ARSC)](https://arsc-audio.org/).
 
-The database is managed by the RPTF’s Metadata Directors, William Vanden Dries (Indiana University) and Mark Matienzo (Stanford University). This is the third iteration of this database. The first and second iterations were built using the open source Blacklight project. If you have comments about the data or search interface please contact Mark or William by email.
+This latest iteration of the SCD represents a new chapter in the project’s development. Rebuilt as a static website using GitHub Pages and guided by minimal computing principles, the current version is maintained and developed by the [Maryland Institute for Technology in the Humanities (MITH)](https://mith.umd.edu/) at the University of Maryland. The new platform emphasizes transparency, sustainability, and long-term stewardship of metadata describing historically significant and at-risk audio collections. This work was generously supported by a gift from the [National Recording Preservation Foundation (NRPF)](https://www.recordingpreservation.org/about/).
 
-## Citation
-For more background on the database, E. Goodmann, M. A. Matienzo, S. VanCour and W. V. Dries, “Building the National Radio Recordings Database: A Big Data Approach to Documenting Audio Heritage,” Proceedings of the 2019 IEEE International Conference on Big Data (Big Data), Los Angeles, CA, USA, 2019, pp. 3080-3086. doi:10.1109/BigData47090.2019.9006520.
+The SCD remains a collaborative, evolving resource. We continue to seek out collections for inclusion and welcome contributions from institutions, scholars, and the public. To submit a collection to the database, use [this submission form](https://airtable.com/appjiL3avrIs3jLVo/shrQ1lOcNqnwVcKve). The top of the form also contains instructions to enter a number of collections in bulk.
 
-The RPTF is directed by Josh Shepperd, Assistant Professor, Catholic University of America.
+#### Project Leadership and Acknowledgments
 
-## Additional Contributors to the Database
-Amanda Keeler (Marquette University)
-Neil Verma (Northwestern University)
-Emily Goodmann (Clarke University)
-Dylan Flesch (KEXP 90.3 FM Seattle)
-## Interns
-Megan Kane (Clarke University)
-Julia Peres Guimaraes (Northwestern University)
+This SCD site and data are currently overseen by [Stephanie Sapienza](https://mith.umd.edu/people/stephanie-sapienza/) (Digital Humanities Archivist) and [Raffaele Viglianti](https://mith.umd.edu/people/raffaele-viglianti/) (Senior Research Software Developer). The SCD Advisory Group includes Patrick Midtlyng, Brandon Burke, Yuri Shimoda, A.J. Bauer, and William Van Den Dries, who contributed their expertise to revisions and upgrades of the data model and collection submission workflows.
+
+Previous versions of the database were developed using the open-source Blacklight framework, as part of a massive flagship RPTF initiative. We acknowledge the foundational work of the previous developers and contributors, whose efforts made this resource possible:
+
+- Maria Matienzo
+- William Van Den Dries
+- Amanda Keeler
+- Neil Verma
+- Emily Goodmann
+- Dylan Flesch
+- Megan Kane
+- Julia Peres Guimaraes
+
+#### Project Background
+
+For more background on the development of the database project, read E. Goodmann, M. A. Matienzo, S. VanCour and W. V. Dries, [“Building the National Radio Recordings Database: A Big Data Approach to Documenting Audio Heritage.”](https://matienzo.org/storage/2019/2019-rptf-database.pdf)
