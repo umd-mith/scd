@@ -49,7 +49,8 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
             </h2>
             <p className="text-red-800 underline"><Link to="/search">« Back to search</Link></p>
             <table className="mb-8 border-separate border-spacing-2">
-              <tbody>
+              <tbody className="[&>tr:nth-child(even)]:bg-gray-100">
+                {d.ssp_status && <Field label="Sound Submissions Collection" value={d.ssp_status}/>}
                 { // additional fields for public entries.
                   d.scd_publish_status !== "collection-owner-title-description-only" && <>
                   {d.record_type && <Field label="record_type" value={d.record_type}/>}

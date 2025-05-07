@@ -35,7 +35,7 @@ const Results = ({results, fieldLabels, start}: ResultProps) => {
           {start + i}. <Link to={`/collections/${d.collection_id}`} className="text-rose-800 hover:underline">{d.collection_title}</Link>
         </h3>
         <table className="mb-8 border-separate border-spacing-2">
-          <tbody>
+          <tbody className="[&>tr:nth-child(even)]:bg-gray-100">
             {d.collection_description && <tr>
               <td className="text-slate-500 text-right align-text-top">{getLabel('collection_description')}:</td>
               <td className="align-text-top">{d.collection_description}</td>
@@ -58,6 +58,10 @@ const Results = ({results, fieldLabels, start}: ResultProps) => {
               <td className="text-slate-500 text-right align-text-top">{getLabel('collection_holder_name')}:</td>
               <td className="align-text-top">{d.collection_holder_name}</td>
             </tr>
+            {d.ssp_status && <tr>
+              <td className="text-slate-500 text-right align-text-top">{getLabel('ssp_status')}:</td>
+              <td className="align-text-top">{d.ssp_status}</td>
+            </tr>}
           </tbody>
         </table>
       </article>})
@@ -101,7 +105,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
   }) : results;
 
   const [searchQuery, setSearchQuery] = React.useState<string>()
-  const searchData = useFlexSearch(searchQuery, d.localSearchCollections.index, d.localSearchCollections.store)
+  const searchData = useFlexSearch(searchQuery, d.localSearchCollections?.index, d.localSearchCollections?.store)
   const searchResultIds = searchData.map((item: {collection_id: string}) => item.collection_id)
 
   // Apply search results
@@ -239,6 +243,54 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     quietlyUpdateUrlSearch(urlQueries)
   }
 
+
+  // const addAllFacets = (items: {cat: string, val: string}[]) => {
+  //   let newFacets: Facet[] = [...facets]
+  //   for (const i of items) {
+  //     if (facets.filter(f => f.cat === i.cat && f.val === i.val)[0] === undefined) {
+  //       newFacets = [...newFacets, {cat: i.cat, val: i.val}]
+  //     }
+  //   }
+  //   setFacets(newFacets)
+  //   const urlQueries = facetsToUrlQuery(newFacets)
+  //   quietlyUpdateUrlSearch(urlQueries)
+  // }
+
+  // const removeAllFacets = (items: {cat: string, val: string}[]) => {
+  //   const newFacets: Facet[] = [];
+  //   const removedFacets: string[] = [];
+  //   facets.forEach(f => {
+  //     if (!items.find(i => i.cat === f.cat && i.val === f.val)) {
+  //       newFacets.push(f)
+  //     } else {
+  //       removedFacets.push(f.cat)
+  //     }
+  //   })
+  //   setFacets(newFacets)
+  //   quietlyRemoveUrlSearch(removedFacets)
+  //   const urlQueries = facetsToUrlQuery(newFacets)
+  //   quietlyUpdateUrlSearch(urlQueries)
+  // }
+  const toggleFacets = (items: {cat: string, val: string}[]) => {
+    const newFacets: Facet[] = [];
+    const removedFacets: string[] = [];
+    facets.forEach(f => {
+      if (!items.find(i => i.cat === f.cat && i.val === f.val)) {
+        newFacets.push(f)
+      } else {
+        removedFacets.push(f.cat)
+      }
+    })
+    items.forEach(i => {
+      if (facets.filter(f => f.cat === i.cat && f.val === i.val)[0] === undefined) {
+        newFacets.push(i)
+      }
+    })
+    setFacets(newFacets)
+    const urlQueries = facetsToUrlQuery(newFacets)
+    quietlyUpdateUrlSearch(urlQueries)
+  }
+
   const SmallPagination = () => {
     const prev = currentPage > 1 ? <><a href="#" onClick={(e) => handleChange(e, "prev")} className="hover:underline">« Previous</a> | </> : "";
     const next = currentPage < totalPages ? <> | <a href="#" onClick={(e) => handleChange(e, "next")} className="hover:underline">Next »</a></> : "";
@@ -337,6 +389,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
                       activeFacets={facets.filter(f => f.cat === fieldName)}
                       add={handleAddFacet}
                       remove={handleRemoveFacet}
+                      toggle={toggleFacets}
                     />
                   );
                 })}
@@ -394,6 +447,7 @@ export const query = graphql`
           content_types
           creators
           subjects
+          ssp_status
         }
       }
     }

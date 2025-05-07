@@ -45,6 +45,7 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
             supporting_documentation
             languages
             inventory_description
+            ssp_status
           }
         }
       }

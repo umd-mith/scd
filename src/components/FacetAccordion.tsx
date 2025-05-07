@@ -8,6 +8,7 @@ interface FacetAccordionProps {
   activeFacets: {cat: string, val: string}[]
   add: (cat: string, val: string) => void
   remove: (cat: string, val: string) => void
+  toggle: (items: {cat: string, val: string}[]) => void
 }
 
 interface Item {
@@ -15,7 +16,7 @@ interface Item {
   count: number
 }
 
-const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({label, items, fieldName, activeFacets, add, remove}) => {
+const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({label, items, fieldName, activeFacets, add, remove, toggle}) => {
   const [expanded, setExpanded] = React.useState(false)
   const [expanding, setExpanding] = React.useState(false)
   const [maxHeight, setMaxHeight] = React.useState<string | undefined>(undefined);
@@ -53,6 +54,11 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({lab
     remove(fieldName, item.label)
   }
 
+  const handleToggle = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    toggle(items.map(item => ({cat: fieldName, val: item.label})))
+  }
+
   return (
     <div className="w-full border rounded-md mb-4">
       <button type="button" className={`inline-flex w-full justify-between gap-x-1.5 px-3 py-2 text-sm font-semibold text-gray-900 
@@ -73,8 +79,19 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({lab
         }}
       >
         {expanded && 
-          <ul className="table table-fixed w-full m-0 list-none p-4">{
-            items.map((item, _) => {
+          <ul className="table table-fixed w-full m-0 list-none p-4">
+            <li className={`table-row ${activeFacets.length === items.length ? 'text-green-600 font-bold' : ''} border-b`}>
+              <span className="table-cell px-4 -indent-4 pb-2 break-words hyphens-auto">
+                {activeFacets.length === items.length
+                  ? <>
+                      <a onClick={handleToggle} href="#" className="text-gray-500 font-bold pr-2 text-[0.6rem] align-bottom hover:text-rose-800"><span aria-hidden="true">✖</span><span className="sr-only">[remove]</span></a>
+                      [none]
+                    </>
+                  : <a className="text-rose-800 hover:underline" href="#" onClick={handleToggle}>[all]</a>
+                }
+              </span>
+            </li>
+            {items.map((item, _) => {
               const active = Boolean(activeFacets.filter(f => f.val === item.label)[0])
               return <li className={`table-row ${active ? 'text-green-600 font-bold' : ''}`} key={`v${item.label}`}>
                 <span className="table-cell px-4 -indent-4 pb-2 break-words hyphens-auto">
