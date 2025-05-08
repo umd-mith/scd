@@ -9,7 +9,7 @@ This latest iteration of the SCD represents a new chapter in the project’s dev
 
 The SCD remains a collaborative, evolving resource. We continue to seek out collections for inclusion and welcome contributions from institutions, scholars, and the public. To submit a collection to the database, use [this submission form](https://airtable.com/appjiL3avrIs3jLVo/shrQ1lOcNqnwVcKve). The top of the form also contains instructions to enter a number of collections in bulk.
 
-#### Project Leadership and Acknowledgments
+## Project Leadership and Acknowledgments
 
 This SCD site and data are currently overseen by [Stephanie Sapienza](https://mith.umd.edu/people/stephanie-sapienza/) (Digital Humanities Archivist) and [Raffaele Viglianti](https://mith.umd.edu/people/raffaele-viglianti/) (Senior Research Software Developer). The SCD Advisory Group includes Patrick Midtlyng, Brandon Burke, Yuri Shimoda, A.J. Bauer, and William Van Den Dries, who contributed their expertise to revisions and upgrades of the data model and collection submission workflows.
 
@@ -24,6 +24,6 @@ Previous versions of the database were developed using the open-source Blackligh
 - Megan Kane
 - Julia Peres Guimaraes
 
-#### Project Background
+## Project Background
 
 For more background on the development of the database project, read E. Goodmann, M. A. Matienzo, S. VanCour and W. V. Dries, [“Building the National Radio Recordings Database: A Big Data Approach to Documenting Audio Heritage.”](https://matienzo.org/storage/2019/2019-rptf-database.pdf)

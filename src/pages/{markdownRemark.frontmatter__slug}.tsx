@@ -19,8 +19,8 @@ export default function MdPageTemplate({data}: MdPageTemplateProps) {
   return (
     <Layout>
       <div className="w-full max-w-hlg md:flex-nowrap  md:justify-start justify-between items-center px-4 m-auto">
-        <h2 className="text-4xl">{frontmatter.title}</h2>
-        <div dangerouslySetInnerHTML={{ __html: html }}/>
+        <h2 className="text-4xl my-4">{frontmatter.title}</h2>
+        <div dangerouslySetInnerHTML={{ __html: html }} className="prose mb-4 max-w-fit"/>
       </div>
     </Layout>
   )
