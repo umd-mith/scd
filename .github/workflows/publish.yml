@@ -19,8 +19,9 @@ jobs:
           AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN  }}
           AIRTABLE_SCD_BASE_ID: ${{ secrets.AIRTABLE_SCD_BASE_ID }}
         run: |
+          rm -rf .cache public
           npm install
-          npm run build-pages
+          GATSBY_CPU_COUNT=2 npm run build-pages
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
