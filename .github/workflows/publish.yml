@@ -13,5 +13,5 @@ jobs:
           AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN  }}
           AIRTABLE_SCD_BASE_ID: ${{ secrets.AIRTABLE_SCD_BASE_ID }}
         with:
-          access-token: ${{ secrets.ACCESS_TOKEN }}
+          access-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-branch: gh-pages
