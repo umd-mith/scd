@@ -2,6 +2,7 @@ import * as React from "react"
 import type { PropsWithChildren } from "react"
 
 interface FacetAccordionProps {
+  asCheckbox?: boolean
   label: string
   items: Item[]
   fieldName: string
@@ -16,7 +17,8 @@ interface Item {
   count: number
 }
 
-const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({label, items, fieldName, activeFacets, add, remove, toggle}) => {
+const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({asCheckbox, label, items, fieldName, activeFacets, add, remove, toggle}) => {
+  const [checked, setChecked] = React.useState(false)
   const [expanded, setExpanded] = React.useState(false)
   const [expanding, setExpanding] = React.useState(false)
   const [maxHeight, setMaxHeight] = React.useState<string | undefined>(undefined);
@@ -54,22 +56,41 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({lab
     remove(fieldName, item.label)
   }
 
-  const handleToggle = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
+  const handleToggle = () => {
     toggle(items.map(item => ({cat: fieldName, val: item.label})))
   }
+
+  const checkBox = (<input type="checkbox" className="w-4 h-4 text-[#5F9FEC] bg-gray-100 border-gray-300 rounded accent-red-800"
+    checked={checked}
+    onChange={(e) => {
+      const newChecked = e.target.checked;
+      setChecked(newChecked);
+      handleToggle();
+    }}
+    onClick={(e) => { e.stopPropagation(); }}
+    aria-label={`Select all ${label} items`}
+  />);
+  const caret = (<svg style={{transform: caretRotation}} className="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="#000" aria-hidden="true" data-slot="icon">
+    <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+  </svg>);
 
   return (
     <div className="w-full border rounded-md mb-4">
       <button type="button" className={`inline-flex w-full justify-between gap-x-1.5 px-3 py-2 text-sm font-semibold text-gray-900 
-        ${activeFacets.length > 0 ? 'bg-green-600' : 'bg-slate-100'}`}
+        ${activeFacets.length > 0 ? 'bg-[#5F9FEC]' : 'bg-slate-100'}`}
         aria-expanded={expanded ? 'true' : 'false'} aria-haspopup="true"
-        onClick={() => handleExpanded() }
+        onClick={(e) => {
+          if (asCheckbox) {
+            e.preventDefault()
+            handleToggle();
+            setChecked(!checked)
+         } else {
+          handleExpanded()
+         }
+        }}
       >
         {label}
-        <svg style={{transform: caretRotation}} className="-mr-1 h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="#000" aria-hidden="true" data-slot="icon">
-          <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
-        </svg>
+        {asCheckbox ? checkBox : caret}
       </button>
       <div
         ref={contentRef}
@@ -80,7 +101,7 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({lab
       >
         {expanded && 
           <ul className="table table-fixed w-full m-0 list-none p-4">
-            <li className={`table-row ${activeFacets.length === items.length ? 'text-green-600 font-bold' : ''} border-b`}>
+            <li className={`table-row ${activeFacets.length === items.length ? 'text-[#5F9FEC] font-bold' : ''} border-b`}>
               <span className="table-cell px-4 -indent-4 pb-2 break-words hyphens-auto">
                 {activeFacets.length === items.length
                   ? <>
@@ -93,7 +114,7 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({lab
             </li>
             {items.map((item, _) => {
               const active = Boolean(activeFacets.filter(f => f.val === item.label)[0])
-              return <li className={`table-row ${active ? 'text-green-600 font-bold' : ''}`} key={`v${item.label}`}>
+              return <li className={`table-row ${active ? 'text-[#5F9FEC] font-bold' : ''}`} key={`v${item.label}`}>
                 <span className="table-cell px-4 -indent-4 pb-2 break-words hyphens-auto">
                   {active
                     ? <>

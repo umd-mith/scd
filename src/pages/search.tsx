@@ -132,7 +132,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     // Search Query
     const q = urlParams.get("q")
     if (q) {
-      setSearchQuery(q)
+      setSearchQuery(decodeURI(q))
     }
     // Facets
     const newFacets: Facet[] = []
@@ -140,7 +140,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
       const fieldName = facetFields.get(facet) || ""
       const values = urlParams.get(fieldName)
       if (values) {
-        values.split(",").forEach(val => {
+        values.split("|").forEach(val => {
           if (facets.filter(f => f.cat === fieldName && f.val === val)[0] === undefined) {
             newFacets.push({cat: fieldName, val})
           }
@@ -209,7 +209,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
       const existing = acc.find((i) => i.param === facet.cat);
       if (existing) {
         // If it exists, add the new value to the existing string, separated by a comma
-        existing.val += `,${facet.val}`;
+        existing.val += `|${facet.val}`;
       } else {
         // If it doesn't exist, add a new entry to the accumulator
         acc.push({ param: facet.cat, val: facet.val });
@@ -243,34 +243,6 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
     quietlyUpdateUrlSearch(urlQueries)
   }
 
-
-  // const addAllFacets = (items: {cat: string, val: string}[]) => {
-  //   let newFacets: Facet[] = [...facets]
-  //   for (const i of items) {
-  //     if (facets.filter(f => f.cat === i.cat && f.val === i.val)[0] === undefined) {
-  //       newFacets = [...newFacets, {cat: i.cat, val: i.val}]
-  //     }
-  //   }
-  //   setFacets(newFacets)
-  //   const urlQueries = facetsToUrlQuery(newFacets)
-  //   quietlyUpdateUrlSearch(urlQueries)
-  // }
-
-  // const removeAllFacets = (items: {cat: string, val: string}[]) => {
-  //   const newFacets: Facet[] = [];
-  //   const removedFacets: string[] = [];
-  //   facets.forEach(f => {
-  //     if (!items.find(i => i.cat === f.cat && i.val === f.val)) {
-  //       newFacets.push(f)
-  //     } else {
-  //       removedFacets.push(f.cat)
-  //     }
-  //   })
-  //   setFacets(newFacets)
-  //   quietlyRemoveUrlSearch(removedFacets)
-  //   const urlQueries = facetsToUrlQuery(newFacets)
-  //   quietlyUpdateUrlSearch(urlQueries)
-  // }
   const toggleFacets = (items: {cat: string, val: string}[]) => {
     const newFacets: Facet[] = [];
     const removedFacets: string[] = [];
@@ -287,6 +259,7 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
       }
     })
     setFacets(newFacets)
+    quietlyRemoveUrlSearch(removedFacets)
     const urlQueries = facetsToUrlQuery(newFacets)
     quietlyUpdateUrlSearch(urlQueries)
   }
@@ -380,6 +353,20 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
               <div className={`${showFacets ? '' : 'hidden'} lg:block`}>{
                 Array.from(facetFields.keys()).map((ff) => {
                   const fieldName = facetFields.get(ff) || "";
+                  if (fieldName === "ssp_status") return (
+                    <FacetAccordion
+                      asCheckbox={true}
+                      key={ff}
+                      label={ff}
+                      fieldName={fieldName}
+                      items={extractFacet(fieldName)}
+                      activeFacets={facets.filter(f => f.cat === fieldName)}
+                      add={handleAddFacet}
+                      remove={handleRemoveFacet}
+                      toggle={toggleFacets}
+                    />
+                  );
+
                   return (
                     <FacetAccordion
                       key={ff}
@@ -466,6 +453,10 @@ export const query = graphql`
           Fields
         }
       }
+    }
+    localSearchCollections {
+      store
+      index
     }
   }
 `
