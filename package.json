@@ -10,7 +10,7 @@
   "scripts": {
     "develop": "node --env-file=.env node_modules/.bin/gatsby develop",
     "start": "node --env-file=.env node_modules/.bin/gatsby develop",
-    "build": "node --env-file=.env node_modules/.bin/gatsby build",
+    "build": "PARALLEL_QUERY_RUNNING=false node --env-file=.env node_modules/.bin/gatsby build",
     "build-pages": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",

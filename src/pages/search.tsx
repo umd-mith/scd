@@ -432,13 +432,11 @@ export const query = graphql`
           collection_holder_category
           collection_content_category
           content_types
-          creators
-          subjects
           ssp_status
         }
       }
     }
-    allAirtableScdFacets {
+    allAirtableScdFacets(filter: {data: {Fields: {nin: ["subjects", "creators"]}}}) {
       nodes {
         data {
           scd_field_label_revised
@@ -446,7 +444,7 @@ export const query = graphql`
         }
       }
     }
-    allAirtableScdFields {
+    allAirtableScdFields(filter: {data: {Fields: {nin: ["subjects", "creators"]}}}) {
       nodes {
         data {
           scd_field_label_revised

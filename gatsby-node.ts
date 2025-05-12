@@ -36,8 +36,6 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
             dates
             extent
             historical_relevance
-            subjects
-            creators
             physical_formats
             access_statement
             finding_aid_url
@@ -49,7 +47,7 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
           }
         }
       }
-      allAirtableScdFields {
+      allAirtableScdFields(filter: {data: {Fields: {nin: ["subjects", "creators"]}}}) {
         nodes {
           data {
             Fields
