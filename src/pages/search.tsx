@@ -467,10 +467,6 @@ export const query = graphql`
         }
       }
     }
-    localSearchCollections {
-      store
-      index
-    }
   }
 `
 
