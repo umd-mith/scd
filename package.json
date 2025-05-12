@@ -10,8 +10,8 @@
   "scripts": {
     "develop": "node --env-file=.env node_modules/.bin/gatsby develop",
     "start": "node --env-file=.env node_modules/.bin/gatsby develop",
-    "build": "node --env-file=.env node_modules/.bin/gatsby build",
-    "build-pages": "gatsby build --verbose",
+    "build": "gastby build",
+    "build-local": "node --env-file=.env node_modules/.bin/gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "typecheck": "tsc --noEmit"
