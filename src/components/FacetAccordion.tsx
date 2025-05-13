@@ -115,7 +115,7 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({asC
             {items.map((item, _) => {
               const active = Boolean(activeFacets.filter(f => f.val === item.label)[0])
               return <li className={`table-row ${active ? 'text-[#5F9FEC] font-bold' : ''}`} key={`v${item.label}`}>
-                <span className="table-cell px-4 -indent-4 pb-2 break-words hyphens-auto">
+                <span className="table-cell pl-4 -indent-4 pb-2 break-words hyphens-auto">
                   {active
                     ? <>
                         <a onClick={(e) => handleRemoveFacet(e, item)} href="#" className="text-gray-500 font-bold pr-2 text-[0.6rem] align-bottom hover:text-rose-800"><span aria-hidden="true">✖</span><span className="sr-only">[remove]</span></a>
@@ -124,7 +124,7 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({asC
                     : <a className="text-rose-800 hover:underline" href="#" onClick={(e) => handleItemClick(e, item)}>{item.label}</a>
                   }
                 </span>
-                <span className="table-cell align-top text-right w-20">{item.count}</span>
+                <span className="table-cell align-top text-right w-16">{item.count}</span>
               </li>
             })
           }</ul>
