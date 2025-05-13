@@ -11,6 +11,36 @@ export const createPages: GatsbyNode["createPages"] = async ({ actions: { create
   const utils: IMakePages = {createPage, graphql};
 
   await makeCollectionPages(utils)
+  await makeContentPages(utils)
+}
+
+async function makeContentPages({createPage, graphql}: IMakePages) {
+  const results = await graphql(`
+    query content {
+      allMarkdownRemark {
+        nodes {
+          html
+          frontmatter {
+            slug
+            title
+          }
+        }
+      }
+    }`)
+
+    const r = results.data as Queries.contentQuery;
+    const {nodes} = r.allMarkdownRemark;
+
+    for (const content of nodes) {
+      createPage({
+        path: content?.frontmatter?.slug || "/err",
+        component: path.resolve(`./src/templates/content.tsx`),
+        context: {
+          title: content?.frontmatter?.title,
+          html: content?.html
+        }
+      })
+    }
 }
 
 async function makeCollectionPages({createPage, graphql}: IMakePages) {
@@ -44,10 +74,12 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
             languages
             inventory_description
             ssp_status
+            subjects
+            creators
           }
         }
       }
-      allAirtableScdFields(filter: {data: {Fields: {nin: ["subjects", "creators"]}}}) {
+      allAirtableScdFields {
         nodes {
           data {
             Fields

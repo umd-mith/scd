@@ -426,7 +426,7 @@ export const query = graphql`
           extent
           physical_formats
           finding_aid_url
-
+          inventory_description
           record_type
           collection_holder_state
           collection_holder_category
