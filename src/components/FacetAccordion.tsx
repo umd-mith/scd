@@ -76,7 +76,7 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({asC
 
   return (
     <div className="w-full border rounded-md mb-4">
-      <button type="button" className={`inline-flex w-full justify-between gap-x-1.5 px-3 py-2 text-sm font-semibold text-gray-900 
+      <button type="button" className={`text-left inline-flex w-full justify-between gap-x-1.5 px-3 py-2 text-sm font-semibold text-gray-900 
         ${activeFacets.length > 0 ? 'bg-[#5F9FEC]' : 'bg-slate-100'}`}
         aria-expanded={expanded ? 'true' : 'false'} aria-haspopup="true"
         onClick={(e) => {
@@ -101,7 +101,7 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({asC
       >
         {expanded && 
           <ul className="table table-fixed w-full m-0 list-none p-4">
-            <li className={`table-row ${activeFacets.length === items.length ? 'text-[#5F9FEC] font-bold' : ''} border-b`}>
+            {/* <li className={`table-row ${activeFacets.length === items.length ? 'text-[#5F9FEC] font-bold' : ''} border-b`}>
               <span className="table-cell px-4 -indent-4 pb-2 break-words hyphens-auto">
                 {activeFacets.length === items.length
                   ? <>
@@ -111,7 +111,7 @@ const FacetAccordion: React.FC<PropsWithChildren & FacetAccordionProps>  = ({asC
                   : <a className="text-rose-800 hover:underline" href="#" onClick={handleToggle}>[all]</a>
                 }
               </span>
-            </li>
+            </li> */}
             {items.map((item, _) => {
               const active = Boolean(activeFacets.filter(f => f.val === item.label)[0])
               return <li className={`table-row ${active ? 'text-[#5F9FEC] font-bold' : ''}`} key={`v${item.label}`}>
