@@ -436,7 +436,8 @@ export const query = graphql`
         }
       }
     }
-    allAirtableScdFacets(filter: {data: {Fields: {nin: ["subjects", "creators"]}}}) {
+    allAirtableScdFacets(filter: {data: {Fields: {nin: ["subjects", "creators"]}}}
+    sort: {data: {facet_order: ASC}}) {
       nodes {
         data {
           scd_field_label_revised
