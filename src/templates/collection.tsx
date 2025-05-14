@@ -20,7 +20,7 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
   const faURL = d.finding_aid_url && d.finding_aid_url.startsWith("http") ? d.finding_aid_url : `http://${d.finding_aid_url}`
   const catURL = d.collection_catalog_url && d.collection_catalog_url.startsWith("http") ? d.collection_catalog_url : `http://${d.collection_catalog_url}`
   const ctypes = d.content_types || []
-  const subjects = d.subjects || []
+  const subjects = d.subjects_all || []
   const formats = d.physical_formats || []
   const langs = d.languages || []
   const contentCats = d.collection_content_category || []

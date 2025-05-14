@@ -353,22 +353,11 @@ const SearchPage: React.FC<PageProps> = ({data}) => {
               <div className={`${showFacets ? '' : 'hidden'} lg:block`}>{
                 Array.from(facetFields.keys()).map((ff) => {
                   const fieldName = facetFields.get(ff) || "";
-                  if (fieldName === "ssp_status") return (
-                    <FacetAccordion
-                      asCheckbox={true}
-                      key={ff}
-                      label={ff}
-                      fieldName={fieldName}
-                      items={extractFacet(fieldName)}
-                      activeFacets={facets.filter(f => f.cat === fieldName)}
-                      add={handleAddFacet}
-                      remove={handleRemoveFacet}
-                      toggle={toggleFacets}
-                    />
-                  );
+                  const asCheckBox = fieldName === "ssp_status" ? true : false;
 
                   return (
                     <FacetAccordion
+                      asCheckbox={asCheckBox}
                       key={ff}
                       label={ff}
                       fieldName={fieldName}
@@ -433,10 +422,11 @@ export const query = graphql`
           collection_content_category
           content_types
           ssp_status
+          subjects
         }
       }
     }
-    allAirtableScdFacets(filter: {data: {Fields: {nin: ["subjects", "creators"]}}}
+    allAirtableScdFacets(filter: {data: {Fields: {nin: ["creators"]}}}
     sort: {data: {facet_order: ASC}}) {
       nodes {
         data {

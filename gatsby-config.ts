@@ -111,7 +111,7 @@ const config: GatsbyConfig = {
                   dates
                   extent
                   historical_relevance
-                  subjects
+                  subjects_all
                   creators
                   physical_formats
                   access_statement

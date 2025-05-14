@@ -74,7 +74,7 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
             languages
             inventory_description
             ssp_status
-            subjects
+            subjects_all
             creators
           }
         }
