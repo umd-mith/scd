@@ -14,7 +14,7 @@ const Header = () => {
       <ul className="flex basis-auto justify-end grow items-center list-none text-slate-100">
         <li className="p-2 hover:text-slate-300"><Link to="/about">About</Link></li>
         <li className="p-2 hover:text-slate-300"><Link to="/search">Search</Link></li>
-        <li className="p-2 hover:text-slate-300"><Link to="#">Recommend a Collection</Link></li>
+        <li className="p-2 hover:text-slate-300"><Link to="https://airtable.com/appjiL3avrIs3jLVo/shrQ1lOcNqnwVcKve">Recommend a Collection</Link></li>
       </ul>
     </nav>
   </header>
