@@ -76,6 +76,7 @@ async function makeCollectionPages({createPage, graphql}: IMakePages) {
             ssp_status
             subjects_all
             creators
+            website_url
           }
         }
       }

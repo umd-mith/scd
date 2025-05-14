@@ -32,10 +32,11 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
   d.collection_holder_state ? loc.push(d.collection_holder_state) : false; 
   d.collection_holder_country ? loc.push(d.collection_holder_country) : false;
 
-  const Field = ({label, value}: {label: string, value: string}) => {
+  const Field = ({label, value, isLink}: {label: string, value: string, isLink?: boolean}) => {
+    const _value = isLink ? <a className="underline break-all" href={value}>{value}</a> : value;
     return <tr>
       <td className="text-slate-500 text-right align-text-top">{getLabel(label)}:</td>
-      <td className="align-text-top">{value}</td>
+      <td className="align-text-top">{_value}</td>
     </tr>
   }
 
@@ -57,6 +58,7 @@ const Collection: React.FC<PageProps> = ({pageContext}) => {
                   {contentCats.length > 0 && <Field label="collection_content_category" value={contentCats.join('; ')}/>}
                 </>}
                 {d.collection_description && <Field label="collection_description" value={d.collection_description}/>}
+                {d.website_url && <Field label="website_url" value={d.website_url} isLink/>}
                 { // additional fields for public entries.
                   d.scd_publish_status !== "collection-owner-title-description-only" && <>
                   {holderCats && <Field label="collection_holder_category" value={holderCats.join("; ")}/>}
